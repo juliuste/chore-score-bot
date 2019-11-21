@@ -12,4 +12,4 @@
 /dist
 /deploy
 /state.json
-/app/names.json
+/app/settings.json

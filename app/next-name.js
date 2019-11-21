@@ -3,7 +3,7 @@
 const loadJson = require('load-json-file')
 const writeJson = require('write-json-file')
 const shuffle = require('lodash/shuffle')
-const names = require('./names.json')
+const { names } = require('./settings.json')
 
 const statePath = './state.json'
 const initialState = () => ({
