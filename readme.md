@@ -1,6 +1,6 @@
 # widschi-bot
 
-Telegram bot for assigning chores with my flatmates. Loops through all names randomly and spits out a name on command.
+Telegram bot for assigning chores with my flatmates. Lets people count if they did a chore and assigns random people who did the least chores yet for new tasks.
 
 [![License](https://img.shields.io/github/license/juliuste/widschi-bot.svg?style=flat)](license)
 
@@ -12,12 +12,15 @@ Add your bot to any group and call the `/chatId` command. Create a file `app/set
 
 ```json5
 {
-    "names": ["Rüdiger","Kunigunde","Karsten"], // people's names
+    "people": [
+        {"name": "Rüdiger", "nickNames": ["RüRü", "R"]},
+        {"name": "Kunigunde", "nickNames": ["Kuni", "Gundel"]},
+        {"name": "Karsten", "nickNames": ["Karrrrrsten"]},
     "chatId": -1234567 // output of the `chatId` command
 }
 ```
 
-You can now call `/next` in your chat.
+You can now call `/next` in your chat. Will pick a random person with the lowest current score. You can also increase your own score ("chore count") by running `/<name>`, e.g. `/karsten`.
 
 ![Demo of the bot in a telegram group](demo.gif)
 

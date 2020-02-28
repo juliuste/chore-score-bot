@@ -3,32 +3,35 @@
 const loadJson = require('load-json-file')
 const writeJson = require('write-json-file')
 const shuffle = require('lodash/shuffle')
-const { names } = require('./settings.json')
+const minBy = require('lodash/minBy')
+const fromPairs = require('lodash/fromPairs')
+const toPairs = require('lodash/toPairs')
+const { people } = require('./settings.json')
 
 const statePath = './state.json'
-const initialState = () => ({
-	order: shuffle(names),
-	nextPosition: 0
-})
+const initialState = () => fromPairs(people.map(p => [p.name, 0]))
 
-const stateIsValid = state => state.nextPosition < state.order.length
+const writeNextState = async state => writeJson(statePath, state)
 
-const writeNextState = async ({ order, nextPosition }) => {
-	await writeJson(statePath, {
-		order,
-		nextPosition: nextPosition + 1
-	})
-}
-
-const next = async () => {
-	const currentState = await (loadJson(statePath).catch(error => {
+const next = async ({ preSelected: name }) => {
+	const state = await (loadJson(statePath).catch(error => {
 		if (error.code !== 'ENOENT') throw error
 		return initialState()
 	}))
-	const state = stateIsValid(currentState) ? currentState : initialState()
-	const name = state.order[state.nextPosition]
+
+	let selectedPerson
+	if (name && Object.keys(state).map(k => k.toLowerCase()).includes(name.toLowerCase())) {
+		const person = people.find(p => p.name.toLowerCase() === name.toLowerCase())
+		state[person.name] += 1
+		selectedPerson = person.name
+	} else {
+		const [randomPersonWithLowestScore] = minBy(shuffle(toPairs(state)), x => x[1])
+		state[randomPersonWithLowestScore] += 1
+		selectedPerson = randomPersonWithLowestScore
+	}
+
 	await writeNextState(state)
-	return name
+	return people.find(p => p.name === selectedPerson)
 }
 
 module.exports = next
