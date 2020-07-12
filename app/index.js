@@ -12,12 +12,15 @@ const command = ({ preSelected }) => async ctx => {
 	console.error('next or /person called')
 	const currentChatId = getChatId(ctx)
 	if (allowedChatId !== currentChatId) return ctx.reply(`Chat with id ${currentChatId} is not authorized.`)
-	const person = await getNextPerson({ preSelected: preSelected })
+	const { person, difference } = await getNextPerson({ preSelected: preSelected })
 	const randomNickName = sample(person.nickNames)
+
 	const msg = preSelected
 		? `🤖 Computer teilt mit: +1 für ${randomNickName || person.name}.`
 		: `🤖 Computer teilt mit: ${randomNickName || person.name} ist dran.`
-	ctx.reply(msg, {
+	const differenceWarning = (preSelected && (difference > 5)) ? '\n\n' + `Hinweis: Die Differenz zwischen der höchsten und der niedrigsten Punktzahl ist derzeit größer als fünf (${difference}). Es wäre empfehlenswert, für die kommenden Aufgaben vermehrt die \`/next\`-Funktion zu nutzen.` : ''
+
+	ctx.reply(msg + differenceWarning, {
 		disable_notification: true
 	})
 }

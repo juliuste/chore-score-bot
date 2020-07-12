@@ -6,6 +6,8 @@ const shuffle = require('lodash/shuffle')
 const minBy = require('lodash/minBy')
 const fromPairs = require('lodash/fromPairs')
 const toPairs = require('lodash/toPairs')
+const max = require('lodash/max')
+const min = require('lodash/min')
 const { people } = require('./settings.json')
 
 const statePath = './state.json'
@@ -31,7 +33,8 @@ const next = async ({ preSelected: name }) => {
 	}
 
 	await writeNextState(state)
-	return people.find(p => p.name === selectedPerson)
+	const difference = max(Object.values(state)) - min(Object.values(state))
+	return { person: people.find(p => p.name === selectedPerson), difference }
 }
 
 module.exports = next
