@@ -14,8 +14,12 @@ const command = ({ preSelected }) => async ctx => {
 	if (allowedChatId !== currentChatId) return ctx.reply(`Chat with id ${currentChatId} is not authorized.`)
 	const person = await getNextPerson({ preSelected: preSelected })
 	const randomNickName = sample(person.nickNames)
-	if (preSelected) ctx.reply(`🤖 Computer teilt mit: +1 für ${randomNickName || person.name}.`)
-	else ctx.reply(`🤖 Computer teilt mit: ${randomNickName || person.name} ist dran.`)
+	const msg = preSelected
+		? `🤖 Computer teilt mit: +1 für ${randomNickName || person.name}.`
+		: `🤖 Computer teilt mit: ${randomNickName || person.name} ist dran.`
+	ctx.reply(msg, {
+		disable_notification: true
+	})
 }
 
 const bot = new Telegraf(process.env.TELEGRAM_TOKEN)
