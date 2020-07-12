@@ -12,11 +12,12 @@ Add your bot to any group and call the `/chatId` command. Create a file `app/set
 
 ```json5
 {
-    "people": [
-        {"name": "Rüdiger", "nickNames": ["RüRü", "R"]},
-        {"name": "Kunigunde", "nickNames": ["Kuni", "Gundel"]},
-        {"name": "Karsten", "nickNames": ["Karrrrrsten"]},
-    "chatId": -1234567 // output of the `chatId` command
+	"people": [
+		{"name": "Rüdiger", "nickNames": ["RüRü", "R"]},
+		{"name": "Kunigunde", "nickNames": ["Kuni", "Gundel"]},
+		{"name": "Karsten", "nickNames": ["Karrrrrsten"]},
+	]
+	"chatId": -1234567, // output of the `chatId` command
 }
 ```
 
