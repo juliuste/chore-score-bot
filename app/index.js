@@ -18,7 +18,7 @@ const command = ({ preSelected }) => async ctx => {
 	const msg = preSelected
 		? `🤖 Computer teilt mit: +1 für ${randomNickName || person.name}.`
 		: `🤖 Computer teilt mit: ${randomNickName || person.name} ist dran.`
-	const differenceWarning = (preSelected && (difference > 5)) ? '\n\n' + `Hinweis: Die Differenz zwischen der höchsten und der niedrigsten Punktzahl ist derzeit größer als fünf (${difference}). Es wäre empfehlenswert, für die kommenden Aufgaben vermehrt die \`/next\`-Funktion zu nutzen.` : ''
+	const differenceWarning = (preSelected && (difference > 5)) ? '\n\n' + `Hinweis: Die Differenz zwischen der höchsten und der niedrigsten Punktzahl ist derzeit größer als fünf (${difference}).` : ''
 
 	ctx.reply(msg + differenceWarning, {
 		disable_notification: true
