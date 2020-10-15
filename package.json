@@ -1,37 +1,35 @@
 {
-	"private": true,
 	"name": "widschi-bot",
 	"version": "0.0.0",
-	"author": "Julius Tens <mail@juliustens.eu>",
+	"private": true,
 	"homepage": "https://github.com/juliuste/widschi-bot",
-	"repository": "juliuste/widschi-bot",
 	"bugs": "https://github.com/juliuste/widschi-bot/issues",
-	"devDependencies": {
-		"depcheck": "^0.9.2",
-		"eslint": "^6.8.0",
-		"eslint-config-standard": "^14.1.0",
-		"eslint-plugin-import": "^2.20.1",
-		"eslint-plugin-node": "^10.0.0",
-		"eslint-plugin-promise": "^4.2.1",
-		"eslint-plugin-standard": "^4.0.1",
-		"tape": "^4.13.0",
-		"tape-promise": "^4.0.0"
-	},
+	"repository": "juliuste/widschi-bot",
+	"license": "ISC",
+	"author": "Julius Tens <mail@juliustens.eu>",
 	"scripts": {
 		"check-deps": "depcheck",
-		"lint": "eslint app",
 		"fix": "eslint --fix app",
+		"lint": "eslint app",
 		"start": "node app/index",
 		"test": "npm run lint && npm run check-deps && node test"
 	},
-	"engines": {
-		"node": ">=10"
-	},
-	"license": "ISC",
 	"dependencies": {
 		"load-json-file": "^6.2.0",
 		"lodash": "^4.17.15",
 		"telegraf": "^3.36.0",
 		"write-json-file": "^4.3.0"
+	},
+	"devDependencies": {
+		"depcheck": "^1.2.0",
+		"eslint": "^7.11.0",
+		"eslint-config-standard": "^14.1.1",
+		"eslint-plugin-import": "^2.22.1",
+		"eslint-plugin-node": "^11.1.0",
+		"eslint-plugin-promise": "^4.2.1",
+		"eslint-plugin-standard": "^4.0.1"
+	},
+	"engines": {
+		"node": ">=10"
 	}
 }

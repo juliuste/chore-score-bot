@@ -15,7 +15,7 @@ const initialState = () => fromPairs(people.map(p => [p.name, 0]))
 
 const writeNextState = async state => writeJson(statePath, state)
 
-const next = async ({ preSelected: name }) => {
+const next = async ({ preSelected: name }, amount) => {
 	const state = await (loadJson(statePath).catch(error => {
 		if (error.code !== 'ENOENT') throw error
 		return initialState()
@@ -24,11 +24,11 @@ const next = async ({ preSelected: name }) => {
 	let selectedPerson
 	if (name && Object.keys(state).map(k => k.toLowerCase()).includes(name.toLowerCase())) {
 		const person = people.find(p => p.name.toLowerCase() === name.toLowerCase())
-		state[person.name] += 1
+		state[person.name] += (amount || 1)
 		selectedPerson = person.name
 	} else {
 		const [randomPersonWithLowestScore] = minBy(shuffle(toPairs(state)), x => x[1])
-		state[randomPersonWithLowestScore] += 1
+		state[randomPersonWithLowestScore] += (amount || 1)
 		selectedPerson = randomPersonWithLowestScore
 	}
 
