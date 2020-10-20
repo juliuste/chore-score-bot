@@ -8,7 +8,7 @@ const fromPairs = require('lodash/fromPairs')
 const toPairs = require('lodash/toPairs')
 const max = require('lodash/max')
 const min = require('lodash/min')
-const { people } = require('./settings.json')
+const { people } = require('./settings')
 
 const statePath = './state.json'
 const initialState = () => fromPairs(people.map(p => [p.name, 0]))
