@@ -12,7 +12,7 @@
 		"fix": "eslint --fix app",
 		"lint": "eslint app",
 		"start": "node app/index",
-		"test": "npm run lint && npm run check-deps && node test"
+		"test": "npm run lint && npm run check-deps"
 	},
 	"dependencies": {
 		"load-json-file": "^6.2.0",

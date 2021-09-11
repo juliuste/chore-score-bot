@@ -1,15 +1,16 @@
+# general
 .DS_Store
+*.log
 
-/.nvm-version
-/node_modules
-/npm-debug.log
+# node-specific
+node_modules
+package-lock.json
+yarn.lock
+shrinkwrap.yaml
+pnpm-lock.yaml
+dist
 
-/yarn.lock
-/pnpm-lock.yaml
-/shrinkwrap.yaml
-/package-lock.json
-
-/dist
+# project-specific
 /deploy
 /state.json
 /app/settings.js
