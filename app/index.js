@@ -1,9 +1,9 @@
-'use strict'
+import { Telegraf } from 'telegraf'
+import lodash from 'lodash'
+import getNextPerson from './next-name.js'
+import { chatId as allowedChatId, people } from './settings.js'
 
-const Telegraf = require('telegraf')
-const get = require('lodash/get')
-const getNextPerson = require('./next-name')
-const { chatId: allowedChatId, people } = require('./settings')
+const { get } = lodash
 
 const getChatId = ctx => get(ctx, 'message.chat.id')
 

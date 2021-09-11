@@ -1,14 +1,9 @@
-'use strict'
+import { loadJsonFile as loadJson } from 'load-json-file'
+import { writeJsonFile as writeJson } from 'write-json-file'
+import lodash from 'lodash'
+import { people } from './settings.js'
 
-const loadJson = require('load-json-file')
-const writeJson = require('write-json-file')
-const shuffle = require('lodash/shuffle')
-const minBy = require('lodash/minBy')
-const fromPairs = require('lodash/fromPairs')
-const toPairs = require('lodash/toPairs')
-const max = require('lodash/max')
-const min = require('lodash/min')
-const { people } = require('./settings')
+const { shuffle, minBy, fromPairs, toPairs, max, min } = lodash
 
 const statePath = './state.json'
 const initialState = () => fromPairs(people.map(p => [p.name, 0]))
@@ -37,4 +32,4 @@ const next = async ({ preSelected: name }, amount) => {
 	return { person: people.find(p => p.name === selectedPerson), difference }
 }
 
-module.exports = next
+export default next
