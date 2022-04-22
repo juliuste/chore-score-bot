@@ -5,15 +5,11 @@ import { chatId as allowedChatId, people } from './settings.js'
 
 const { get } = lodash
 
-
-
 const getChatId = ctx => get(ctx, 'message.chat.id')
 
 const personExists = (name) => people.find(p => p.name.toLowerCase() === name.toLowerCase())
 
 const toIntStrict = (string) => /^[-+]?\d+$/.test(string) ? Number(string) : undefined
-
-
 
 const defaultNameFn = name => amount => `${amount > 0 ? `+${amount}` : String(amount)} für ${name}.`
 const defaultNextFn = name => amount => `${name} ist dran.`
@@ -35,13 +31,11 @@ const updateScoreOrChooseNextAndReply = async (ctx, name, amount) => {
 	})
 }
 
-
-
 const command = ({ preSelected }, amount) => async ctx => {
 	console.error('next or /person called')
 	const currentChatId = getChatId(ctx)
 	if (allowedChatId !== currentChatId) return ctx.reply(`Chat with id ${currentChatId} is not authorized.`)
-	
+
 	updateScoreOrChooseNextAndReply(ctx, preSelected, amount)
 }
 
@@ -49,9 +43,9 @@ const giveCommand = async ctx => {
 	const currentChatId = getChatId(ctx)
 	const text = ctx.message.text
 	const args = text.trim().split(/\s+/)
-	
-	console.error('/give called with arguments ' + args);
-	
+
+	console.error('/give called with arguments ' + args)
+
 	if (allowedChatId !== currentChatId) {
 		return ctx.reply(`Chat with id ${currentChatId} is not authorized.`)
 	}
@@ -63,7 +57,7 @@ const giveCommand = async ctx => {
 		})
 	}
 
-	const amount = args[2] ? toIntStrict(args[2]) : 1;
+	const amount = args[2] ? toIntStrict(args[2]) : 1
 	if (amount === undefined) {
 		return ctx.replyWithMarkdownV2('🤯 Entschuldige, ich kenne die Zahl _' + args[2] + '_ nicht\\.', {
 			disable_notification: true,
@@ -72,8 +66,6 @@ const giveCommand = async ctx => {
 
 	updateScoreOrChooseNextAndReply(ctx, name, amount)
 }
-
-
 
 const bot = new Telegraf(process.env.TELEGRAM_TOKEN)
 
