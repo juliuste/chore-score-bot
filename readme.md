@@ -30,21 +30,22 @@ export const people = [
 ]
 ```
 
-You can now call `/next` in your chat. Will pick a random person with the lowest current score. You can also increase your own score ("chore count") by running `/<name>`, e.g. `/karsten`:
+You can now call `/next` in your chat. Will pick a random person with the lowest current score. You can also increase your own score ("chore count") by running `/<name>`, e.g. `/karsten`. There is also a more generic `/give` command that takes two whitespace-separated arguments, first one of the `name`s in `app/settings.js` and optionally an amount like `5`, `+2` or `-3` (defaults to `1` if no amount is specified) and modifies the person's score accordingly.
 
-| Command               | Effect                                |
-| --------------------- | ------------------------------------- |
-| `/next` / `/<name>`   | +1 for a random person / _name_       |
-| `/next2` / `/<name>2` | +2 for a random person / _name_       |
-| `/next3` / `/<name>3` | +3 for a random person / _name_       |
-| `/next4` / `/<name>4` | +4 for a random person / _name_       |
-| `/next5` / `/<name>5` | +5 for a random person / _name_       |
-| `/anti<name>`         | -1 for _name_                         |
-| `/anti<name>2`        | -2 for _name_                         |
-| `/anti<name>3`        | -3 for _name_                         |
-| `/anti<name>4`        | -4 for _name_                         |
-| `/anti<name>5`        | -5 for _name_                         |
-| *`/chatId`*           | *Get the current chat's telegram id.* |
+| Command                 | Effect                                |
+| ----------------------- | ------------------------------------- |
+| `/next` / `/<name>`     | +1 for a random person / _name_       |
+| `/next2` / `/<name>2`   | +2 for a random person / _name_       |
+| `/next3` / `/<name>3`   | +3 for a random person / _name_       |
+| `/next4` / `/<name>4`   | +4 for a random person / _name_       |
+| `/next5` / `/<name>5`   | +5 for a random person / _name_       |
+| `/anti<name>`           | -1 for _name_                         |
+| `/anti<name>2`          | -2 for _name_                         |
+| `/anti<name>3`          | -3 for _name_                         |
+| `/anti<name>4`          | -4 for _name_                         |
+| `/anti<name>5`          | -5 for _name_                         |
+| `/give <name> <amount>` | Modifies _name_'s score by _amount_.  |
+| *`/chatId`*             | *Get the current chat's telegram id.* |
 
 ![Demo of the bot in a telegram group](demo.gif)
 
