@@ -19,6 +19,7 @@
 		"lodash": "^4.17.21",
 		"mongodb": "^4.5.0",
 		"telegraf": "^4.4.1",
+		"telegram-format": "^2.1.0",
 		"write-json-file": "^5.0.0"
 	},
 	"devDependencies": {
