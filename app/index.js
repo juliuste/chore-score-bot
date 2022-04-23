@@ -10,7 +10,6 @@ const defaultNameFn = name => amount => `${amount > 0 ? `+${amount}` : String(am
 const defaultNextFn = name => amount => `${name} ist dran.`
 
 const giveCommand = async ctx => {
-	const currentChatId = getChatId(ctx)
 	const text = ctx.message.text
 	const args = text.trim().split(/\s+/)
 
