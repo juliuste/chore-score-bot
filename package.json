@@ -17,6 +17,7 @@
 	"dependencies": {
 		"load-json-file": "^7.0.0",
 		"lodash": "^4.17.21",
+		"mongodb": "^4.5.0",
 		"telegraf": "^4.4.1",
 		"write-json-file": "^5.0.0"
 	},
