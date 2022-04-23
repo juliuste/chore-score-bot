@@ -1,4 +1,5 @@
 import { Telegraf } from 'telegraf'
+import { markdownv2 as format } from 'telegram-format'
 import _ from 'lodash'
 import updateScore from './update-score.js'
 
@@ -25,7 +26,7 @@ const giveCommand = async ctx => {
 
 	const amount = args[2] ? toIntStrict(args[2]) : 1
 	if (amount === undefined) {
-		ctx.replyWithMarkdownV2('🤯 Entschuldige, ich kenne die Zahl _' + args[2] + '_ nicht\\.', {
+		ctx.replyWithMarkdownV2(`🤯 Entschuldige, ich kenne die Zahl ${format.italic(format.escape(args[2]))} nicht\\.`, {
 			disable_notification: true,
 		})
 		return
@@ -34,7 +35,7 @@ const giveCommand = async ctx => {
 	const { err, difference } = await updateScore(ctx.chat.id, name, amount)
 
 	if (err) {
-		ctx.replyWithMarkdownV2('🤯 Entschuldige, ich kenne die Person _' + name + '_ nicht\\.', {
+		ctx.replyWithMarkdownV2(`🤯 Entschuldige, ich kenne die Person ${format.italic(format.escape(name))} nicht\\.`, {
 			disable_notification: true,
 		})
 		return
