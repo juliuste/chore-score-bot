@@ -1,6 +1,5 @@
 import { MongoClient, ServerApiVersion } from 'mongodb'
 import { fileURLToPath } from 'url'
-
 import _ from 'lodash'
 
 const credentials = fileURLToPath(new URL('X509-cert-5689221583293842508.pem', import.meta.url))
@@ -10,61 +9,66 @@ const client = new MongoClient('mongodb+srv://widschi-bot.tafbz.mongodb.net/myFi
 	serverApi: ServerApiVersion.v1,
 })
 
+// Dumb helper to access the result of the transaction because of https://jira.mongodb.org/browse/NODE-2014
+const withTransaction = async (session, closure) => {
+	let result
+	await session.withTransaction(async (session) => {
+		result = await closure(session)
+		return result
+	})
+	return result
+}
+
 const normalizeName = name => name.toLowerCase()
 
-const addUser = async (chatID, userID, scoreMode = 'average') => {
+const addUser = async (chatID, userID) => {
+	await client.connect()
+	const session = client.startSession()
+	const collection = client.db('widschi-bot').collection('users')
 	try {
-		await client.connect()
-		const database = client.db('widschi-bot')
-		const collection = database.collection('chats')
-
-		userID = normalizeName(userID)
-
-		const chat = await collection.findOne({
-			id: chatID,
-		})
-
-		let score
-
-		if (!chat) {
-			score = 0
-		} else {
-			if (_.find(chat.users, user => user.id === userID)) {
-				throw new Error('user already exists')
-			}
-
-			switch (scoreMode) {
-			case 'average':
-				score = _.meanBy(chat.users, user => user.score) || 0
-				break
-			default:
-				throw new Error('unknown scoreMode')
-			}
-		}
-
-		const result2 = await collection.findOneAndUpdate({
-			id: chatID,
-		}, {
-			$addToSet: {
-				users: {
-					id: userID,
-					score: score,
-					vacation: false,
+		return await withTransaction(session, async (session) => {
+			const cursor = await collection.aggregate([
+				{
+					$match: { chatID: chatID },
+				}, {
+					$group: {
+						_id: null,
+						average: { $avg: '$score' },
+					},
 				},
-			},
-		}, {
-			upsert: true,
-		})
-
-		if (result2.value === null) {
-			throw new Error('database error')
-		} else {
-			return {
-				userID: userID,
-				score: score,
+			], {
+				session: session,
+			})
+			let average = 0
+			for await (const first of cursor) {
+				average = first.average || 0
+				break
 			}
-		}
+			userID = normalizeName(userID)
+			const newUser = {
+				chatID: chatID,
+				userID: userID,
+				vacation: false,
+				score: average,
+			}
+
+			const result = await collection.findOneAndUpdate({
+				chatID: chatID,
+				userID: userID,
+			}, {
+				$setOnInsert: newUser,
+			}, {
+				upsert: true,
+				session: session,
+			})
+			if (result.value === null) {
+				return newUser
+			} else {
+				return null
+			}
+		})
 	} finally {
+		await session.endSession()
 		await client.close()
 	}
 }
@@ -72,28 +76,14 @@ const addUser = async (chatID, userID, scoreMode = 'average') => {
 const removeUser = async (chatID, userID) => {
 	try {
 		await client.connect()
-		const database = client.db('widschi-bot')
-		const collection = database.collection('chats')
-
-		const result = await collection.findOneAndUpdate({
-			id: chatID,
-		}, {
-			$pull: {
-				users: { id: userID },
-			},
-		})
-		const oldChat = result.value
+		const collection = client.db('widschi-bot').collection('users')
 
 		userID = normalizeName(userID)
-		if (oldChat) {
-			if (_.find(oldChat.users, user => user.id === userID)) {
-				return
-			} else {
-				throw new Error('unknown user')
-			}
-		} else {
-			throw new Error('database error')
-		}
+		const result = await collection.findOneAndDelete({
+			chatID: chatID,
+			userID: userID,
+		})
+		return result.value
 	} finally {
 		await client.close()
 	}
@@ -102,37 +92,21 @@ const removeUser = async (chatID, userID) => {
 const toggleVacation = async (chatID, userID) => {
 	try {
 		await client.connect()
-		const database = client.db('widschi-bot')
-		const collection = database.collection('chats')
+		const collection = client.db('widschi-bot').collection('users')
 
-		const chat = await collection.findOne({
-			id: chatID,
-		})
-
-		if (chat === null) {
-			throw new Error('unknown chat')
-		}
-
-		userID = normalizeName(userID)
-		const user = _.find(chat.users, user => user.id === userID)
-		if (!user) {
-			throw new Error('unknown user')
-		}
-		user.vacation = !user.vacation
-
-		const result = await collection.updateOne({
-			id: chatID,
-			'users.id': userID,
-		}, {
-			$set: {
-				'users.$.vacation': user.vacation,
+		const result = await collection.findOneAndUpdate({
+			chatID: chatID,
+			userID: userID,
+		}, [
+			{
+				$set: {
+					vacation: { $not: '$vacation' },
+				},
 			},
+		], {
+			returnDocument: 'after',
 		})
-		if (!result.acknowledged) {
-			throw new Error('database error')
-		}
-
-		return user
+		return result.value
 	} finally {
 		await client.close()
 	}
@@ -141,82 +115,70 @@ const toggleVacation = async (chatID, userID) => {
 const getUsers = async chatID => {
 	try {
 		await client.connect()
-		const database = client.db('widschi-bot')
-		const collection = database.collection('chats')
+		const collection = client.db('widschi-bot').collection('users')
 
-		const chat = await collection.findOne({
-			id: chatID,
+		const cursor = await collection.find({
+			chatID: chatID,
 		})
-
-		if (chat === null) {
-			throw new Error('unknown chat')
+		const users = []
+		for await (const user of cursor) {
+			users.push(user)
 		}
-
-		return chat.users
+		return users
 	} finally {
 		await client.close()
 	}
 }
 
-// Add amount to the score of a certain user. If no user is provided, add amount to the score of the user with the least score.
+// Add amount to the score of a certain user. If userID === null, add amount to the score of the user with the least score.
 const updateScore = async (chatID, userID, amount) => {
+	await client.connect()
+	const collection = client.db('widschi-bot').collection('users')
+	const session = client.startSession()
 	try {
-		await client.connect()
-		const database = client.db('widschi-bot')
-		const collection = database.collection('chats')
+		return await withTransaction(session, async (session) => {
+			if (userID === null) {
+				const cursor = await collection.find({
+					chatID: chatID,
+				}, {
+					session: session,
+				})
+				const users = []
+				for await (const user of cursor) {
+					users.push(user)
+				}
 
-		if (userID === null) {
-			const chat = await collection.findOne({
-				id: chatID,
+				if (users.length === 0) {
+					throw new Error('zero users')
+				}
+
+				const notOnVacation = _.filter(users, user => !user.vacation)
+				if (notOnVacation.length === 0) {
+					throw new Error('zero users not on vacation')
+				}
+
+				const minScore = (_.minBy(notOnVacation, user => user.score)).score
+				const candidates = _.filter(notOnVacation, user => user.score === minScore)
+				const candidate = candidates[_.random(candidates.length - 1)]
+				userID = candidate.userID
+			}
+
+			userID = normalizeName(userID)
+
+			const result = await collection.findOneAndUpdate({
+				chatID: chatID,
+				userID: userID,
+			}, {
+				$inc: { score: amount },
+			}, {
+				returnDocument: 'after',
+				session: session,
 			})
 
-			if (chat === null) {
-				throw new Error('chat unknown')
-			}
-
-			if (chat.users.length === 0) {
-				throw new Error('zero users')
-			}
-
-			const notOnVacation = _.filter(chat.users, user => !user.vacation)
-			if (notOnVacation.length === 0) {
-				throw new Error('zero users not on vacation')
-			}
-
-			const minScore = (_.minBy(notOnVacation, user => user.score)).score
-			const candidates = _.filter(notOnVacation, user => user.score === minScore)
-			const candidate = candidates[_.random(candidates.length - 1)]
-			userID = candidate.id
-		}
-
-		userID = normalizeName(userID)
-
-		const result = await collection.findOneAndUpdate({
-			id: chatID,
-			'users.id': userID,
-		}, {
-			$inc: { 'users.$.score': amount },
-		}, {
-			returnDocument: 'after',
+			return result.value
 		})
-		const chat = result.value
-
-		if (chat === null) {
-			if (userID === null) {
-				// We should have been able to update the user's score, since we just found the user above.
-				throw new Error('database error')
-			} else {
-				// The reason is probably that the user has not been added.
-				throw new Error('chat or user unknown')
-			}
-		}
-
-		const user = _.find(chat.users, user => user.id === userID)
-		const scores = _.map(chat.users, user => user.score)
-		const difference = _.max(scores) - _.min(scores)
-
-		return { user: user, difference: difference }
 	} finally {
+		await session.endSession()
 		await client.close()
 	}
 }

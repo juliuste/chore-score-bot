@@ -2,7 +2,6 @@ import { Telegraf } from 'telegraf'
 import { markdownv2 as format } from 'telegram-format'
 import _ from 'lodash'
 import { table, getBorderCharacters } from 'table'
-import numberFormatter from 'number-formatter'
 
 import * as db from './database.js'
 
@@ -14,6 +13,8 @@ const validName = name => true // dummy implementation
 
 const defaultNameFn = name => amount => `${amount > 0 ? `+${amount}` : String(amount)} für ${name}.`
 // const defaultNextFn = name => amount => `${name} ist dran.`
+
+const scoreToString = score => Math.floor(score).toString()
 
 const tableConfig = {
 	border: getBorderCharacters('void'),
@@ -44,36 +45,35 @@ const giveCommand = async ctx => {
 
 	const amount = args[2] ? toIntStrict(args[2]) : 1
 	if (amount === undefined) {
-		ctx.replyWithMarkdownV2(`🤯 Entschuldige, ich kenne die Zahl ${format.escape(args[2])} nicht\\.`, noNotification)
+		ctx.reply(`🤯 Entschuldige, ich kenne die Zahl ${args[2]} nicht.`, noNotification)
 		return
 	}
 
-	let result
+	let user
 	try {
-		result = await db.updateScore(ctx.chat.id, name, amount)
+		user = await db.updateScore(ctx.chat.id, name, amount)
 	} catch (error) {
 		switch (error.message) {
-		case 'chat unknown':
-		case 'chat or user unknown':
-			ctx.reply(`🤯 Entschuldige, ich kenne die Person ${name} nicht.`, noNotification)
-			break
 		case 'zero users':
 			ctx.reply('🤖 Es sind keine User angemeldet! Füge welche mit /add Name hinzu.')
 			break
 		case 'zero users not on vacation':
 			ctx.reply('🤯 Es sind alle im Urlaub (yay!).')
 			break
-		case 'database error':
 		default:
 			throw error
 		}
 	}
 
-	const msg = defaultNameFn(name)(amount)
-	const vacationWarning = result.user.vacation ? ' (Aber der ist offiziell noch im Urlaub.)' : ''
-	const differenceWarning = (result.difference > 5) ? ` (Differenz: ${result.difference}).` : ''
+	if (user === null) {
+		ctx.reply(`🤯 Entschuldige, ich kenne die Person ${name} nicht.`, noNotification)
+	} else {
+		const msg = defaultNameFn(name)(amount)
+		const vacationWarning = user.vacation ? ' (Ist aber noch im Urlaub.)' : ''
+		// const differenceWarning = (result.difference > 5) ? ` (Differenz: ${result.difference}).` : ''
 
-	ctx.reply('🤖 ' + msg + vacationWarning + differenceWarning, noNotification)
+		ctx.reply('🤖 ' + msg + vacationWarning, noNotification)
+	}
 }
 
 const nextCommand = async ctx => {
@@ -82,13 +82,13 @@ const nextCommand = async ctx => {
 
 	const amount = args[1] ? toIntStrict(args[1]) : 1
 	if (amount === undefined) {
-		ctx.replyWithMarkdownV2(`🤯 Entschuldige, ich kenne die Zahl ${format.escape(args[2])} nicht\\.`, noNotification)
+		ctx.reply(`🤯 Entschuldige, ich kenne die Zahl ${args[2]} nicht.`, noNotification)
 		return
 	}
 
-	let result
+	let user
 	try {
-		result = await db.updateScore(ctx.chat.id, null, amount)
+		user = await db.updateScore(ctx.chat.id, null, amount)
 	} catch (error) {
 		switch (error.message) {
 		case 'zero users':
@@ -102,10 +102,10 @@ const nextCommand = async ctx => {
 		}
 	}
 
-	const msg = defaultNameFn(result.userID)(amount)
-	const differenceWarning = (result.difference > 5) ? ` Vorsicht, vermehrt "next" verwenden. (Differenz: ${result.difference}).` : ''
+	const msg = defaultNameFn(user.userID)(amount)
+	// const differenceWarning = (user.difference > 5) ? ` Vorsicht, vermehrt "next" verwenden. (Differenz: ${user.difference}).` : ''
 
-	ctx.reply('🤖 ' + msg + differenceWarning, noNotification)
+	ctx.reply('🤖 ' + msg, noNotification)
 }
 
 const addCommand = async ctx => {
@@ -122,20 +122,13 @@ const addCommand = async ctx => {
 		return
 	}
 
-	let result
-	try {
-		result = await db.addUser(ctx.chat.id, name, 'average')
-	} catch (error) {
-		switch (error.message) {
-		case 'user already exists':
-			ctx.reply('🤯 Den gibt es schon, soweit ich weiß.', noNotification)
-			return
-		default:
-			throw error
-		}
-	}
+	const user = await db.addUser(ctx.chat.id, name, 'average')
 
-	ctx.replyWithMarkdownV2(`🤖 Habe ${format.escape(result.userID)} hinzugefügt mit einem Score von ${format.escape(result.score.toString())}\\.`, noNotification)
+	if (user === null) {
+		ctx.reply('Den gibt es schon, soweit ich weiß.', noNotification)
+	} else {
+		ctx.reply(`🤖 Habe ${user.userID} hinzugefügt mit einem Score von ${scoreToString(user.score)}.`, noNotification)
+	}
 }
 
 const removeCommand = async ctx => {
@@ -148,19 +141,13 @@ const removeCommand = async ctx => {
 		return
 	}
 
-	try {
-		await db.removeUser(ctx.chat.id, name)
-	} catch (error) {
-		switch (error.message) {
-		case 'unknown user':
-			ctx.reply('🤯 Den kannte ich gar nicht.')
-			return
-		default:
-			throw error
-		}
-	}
+	const user = await db.removeUser(ctx.chat.id, name)
 
-	ctx.replyWithMarkdownV2(`🤖 Ich tracke keinen Score mehr für ${format.escape(name)}\\.`)
+	if (user === null) {
+		ctx.reply('🤯 Den kannte ich gar nicht.')
+	} else {
+		ctx.reply(`🤖 Ich tracke keinen Score mehr für ${user.userID}. ${user.userID} hatte ${scoreToString(user.score)} Punkte `)
+	}
 }
 
 const vacationCommand = async ctx => {
@@ -173,29 +160,20 @@ const vacationCommand = async ctx => {
 		return
 	}
 
-	let user
-	try {
-		user = await db.toggleVacation(ctx.chat.id, name)
-	} catch (error) {
-		switch (error.message) {
-		case 'unknown user':
-			ctx.reply('🤯 Den Benutzer kenne ich gar nicht.')
-			return
-		default:
-			throw error
-		}
-	}
+	const user = await db.toggleVacation(ctx.chat.id, name)
 
-	if (user.vacation) {
-		ctx.replyWithMarkdownV2(`🤖 Ab in den Urlaub, ${format.escape(user.id)}\\!`, noNotification)
+	if (user === null) {
+		ctx.reply('🤯 Den kenne ich gar nicht.')
+	} else if (user.vacation) {
+		ctx.reply(`🤖 Ab in den Urlaub, ${user.userID}!`, noNotification)
 	} else {
-		ctx.replyWithMarkdownV2(`🤖 Willkommen zurück, ${format.escape(user.id)}\\!`, noNotification)
+		ctx.reply(`🤖 Willkommen zurück, ${user.userID}!`, noNotification)
 	}
 }
 
-const showUsersCommand = async ctx => {
+const scoresUsersCommand = async ctx => {
+	console.info('/scores called')
 	const users = await db.getUsers(ctx.chat.id)
-	console.info(users)
 
 	if (users.length === 0) {
 		ctx.reply('🤖 Es sind keine User angemeldet! Füge welche mit /add Name hinzu.')
@@ -204,7 +182,7 @@ const showUsersCommand = async ctx => {
 
 	_.sortBy(users, user => user.score)
 	const message = format.escape('🤖 Scores:\n\n')
-	const pairs = _.map(users, user => [user.id, numberFormatter('0', user.score), user.vacation ? '🏖️' : ''])
+	const pairs = _.map(users, user => [user.userID, scoreToString(user.score), user.vacation ? '🏖️' : ''])
 	const tableString = format.monospaceBlock(table(pairs, tableConfig))
 	ctx.replyWithMarkdownV2(message + tableString, noNotification)
 }
@@ -216,6 +194,6 @@ bot.command('next', nextCommand)
 bot.command('add', addCommand)
 bot.command('remove', removeCommand)
 bot.command('vacation', vacationCommand)
-bot.command('show', showUsersCommand)
+bot.command('scores', scoresUsersCommand)
 
 bot.launch()
