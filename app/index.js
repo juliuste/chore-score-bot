@@ -16,6 +16,11 @@ const defaultNameFn = name => amount => `${amount > 0 ? `+${amount}` : String(am
 
 const scoreToString = score => Math.floor(score).toString()
 
+const computeDifference = users => {
+	const notOnVacation = _.find(users, user => !user.vacation)
+	return _.maxBy(notOnVacation, user => user.score) - _.minBy(notOnVacation, user => user.score)
+}
+
 const tableConfig = {
 	border: getBorderCharacters('void'),
 	drawHorizontalLine: () => false,
@@ -49,30 +54,21 @@ const giveCommand = async ctx => {
 		return
 	}
 
-	let user
-	try {
-		user = await db.updateScore(ctx.chat.id, name, amount)
-	} catch (error) {
-		switch (error.message) {
-		case 'zero users':
-			ctx.reply('🤖 Es sind keine User angemeldet! Füge welche mit /add Name hinzu.')
-			break
-		case 'zero users not on vacation':
-			ctx.reply('🤯 Es sind alle im Urlaub (yay!).')
+	const result = await db.updateScore(ctx.chat.id, name, amount)
+	if (result.user === null) {
+		switch (result.err) {
+		case 'user unknown':
+			ctx.reply(`🤯 Entschuldige, ich kenne die Person ${name} nicht.`, noNotification)
 			break
 		default:
-			throw error
+			throw new Error(result.err)
 		}
-	}
-
-	if (user === null) {
-		ctx.reply(`🤯 Entschuldige, ich kenne die Person ${name} nicht.`, noNotification)
 	} else {
-		const msg = defaultNameFn(name)(amount)
-		const vacationWarning = user.vacation ? ' (Ist aber noch im Urlaub.)' : ''
-		// const differenceWarning = (result.difference > 5) ? ` (Differenz: ${result.difference}).` : ''
-
-		ctx.reply('🤖 ' + msg + vacationWarning, noNotification)
+		const msg = defaultNameFn(result.user.userID)(amount)
+		const vacationWarning = result.user.vacation ? ' (Ist aber noch im Urlaub.)' : ''
+		const difference = computeDifference(result.users)
+		const differenceWarning = (difference > 5) ? ` Vorsicht, vermehrt /next verwenden. (Differenz: ${difference}).` : ''
+		ctx.reply('🤖 ' + msg + vacationWarning + differenceWarning, noNotification)
 	}
 }
 
@@ -82,30 +78,28 @@ const nextCommand = async ctx => {
 
 	const amount = args[1] ? toIntStrict(args[1]) : 1
 	if (amount === undefined) {
-		ctx.reply(`🤯 Entschuldige, ich kenne die Zahl ${args[2]} nicht.`, noNotification)
+		ctx.reply(`🤯 Entschuldige, ich kenne die Zahl ${args[1]} nicht.`, noNotification)
 		return
 	}
 
-	let user
-	try {
-		user = await db.updateScore(ctx.chat.id, null, amount)
-	} catch (error) {
-		switch (error.message) {
+	const result = await db.updateScore(ctx.chat.id, null, amount)
+	if (result.user === null) {
+		switch (result.err) {
 		case 'zero users':
 			ctx.reply('🤖 Es sind keine User angemeldet! Füge welche mit /add Name hinzu.')
-			return
+			break
 		case 'zero users not on vacation':
 			ctx.reply('🤯 Es sind alle im Urlaub (yay!).')
-			return
+			break
 		default:
-			throw error
+			throw new Error(result.err)
 		}
+	} else {
+		const msg = defaultNameFn(result.user.userID)(amount)
+		const difference = computeDifference(result.users)
+		const differenceWarning = (difference > 5) ? ` Vorsicht, vermehrt /next verwenden. (Differenz: ${difference}).` : ''
+		ctx.reply('🤖 ' + msg + differenceWarning, noNotification)
 	}
-
-	const msg = defaultNameFn(user.userID)(amount)
-	// const differenceWarning = (user.difference > 5) ? ` Vorsicht, vermehrt "next" verwenden. (Differenz: ${user.difference}).` : ''
-
-	ctx.reply('🤖 ' + msg, noNotification)
 }
 
 const addCommand = async ctx => {

@@ -40,6 +40,7 @@ const addUser = async (chatID, userID) => {
 				session: session,
 			})
 			let average = 0
+			// eslint-disable-next-line no-unreachable-loop
 			for await (const first of cursor) {
 				average = first.average || 0
 				break
@@ -137,45 +138,87 @@ const updateScore = async (chatID, userID, amount) => {
 	const session = client.startSession()
 	try {
 		return await withTransaction(session, async (session) => {
+			const cursor = await collection.find({
+				chatID: chatID,
+			}, {
+				session: session,
+			})
+			const users = []
+			for await (const user of cursor) {
+				users.push(user)
+			}
+			const notOnVacation = _.filter(users, user => !user.vacation)
+
+			let candidate
 			if (userID === null) {
-				const cursor = await collection.find({
-					chatID: chatID,
-				}, {
-					session: session,
-				})
-				const users = []
-				for await (const user of cursor) {
-					users.push(user)
-				}
-
 				if (users.length === 0) {
-					throw new Error('zero users')
+					return {
+						user: null,
+						err: 'zero users',
+					}
 				}
-
-				const notOnVacation = _.filter(users, user => !user.vacation)
 				if (notOnVacation.length === 0) {
-					throw new Error('zero users not on vacation')
+					return {
+						user: null,
+						err: 'zero users not on vacation',
+					}
 				}
-
 				const minScore = (_.minBy(notOnVacation, user => user.score)).score
 				const candidates = _.filter(notOnVacation, user => user.score === minScore)
-				const candidate = candidates[_.random(candidates.length - 1)]
-				userID = candidate.userID
+				candidate = candidates[_.random(candidates.length - 1)]
+			} else {
+				userID = normalizeName(userID)
+				candidate = _.find(users, user => user.userID === userID)
+				if (candidate === undefined) {
+					return {
+						user: null,
+						err: 'user unknown',
+					}
+				}
 			}
 
-			userID = normalizeName(userID)
+			// If the candidate is on vacation (and therefore not part of notOnVacation), they were probably not on vacation when they earned their points, and it is therefore fairer to include them in the number of people "who this work was for" to calculate the vacation setoff. (It seems impossible to be completely fair in every situation without making users specify when exactly the points were earned, which is too complex, and this is an okay approximation.) This also prevents the dividend from being zero when everyone is on vacation, and therefore prevents division by zero.
+			const spreadAmong = notOnVacation.length + (candidate.vacation ? 1 : 0)
+			const vacationSetoff = amount / spreadAmong
 
-			const result = await collection.findOneAndUpdate({
+			await collection.updateMany({
 				chatID: chatID,
-				userID: userID,
-			}, {
-				$inc: { score: amount },
-			}, {
-				returnDocument: 'after',
+				$or: [
+					{ vacation: true },
+					{ userID: candidate.userID },
+				],
+			}, [{
+				$set: {
+					score: {
+						$add: [
+							'$score',
+							{
+								$cond: {
+									if: { $eq: ['$userID', candidate.userID] },
+									then: amount,
+									else: vacationSetoff,
+								},
+							},
+						],
+					},
+				},
+			}], {
 				session: session,
 			})
 
-			return result.value
+			// mirror the changes for the correct return value
+			for (const user of users) {
+				if (user === candidate) {
+					user.score += amount
+				} else if (user.vacation) {
+					user.score += vacationSetoff
+				}
+			}
+			return {
+				err: '',
+				user: candidate,
+				users: users,
+			}
 		})
 	} finally {
 		await session.endSession()
