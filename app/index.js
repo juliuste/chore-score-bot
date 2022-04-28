@@ -55,7 +55,7 @@ const giveCommand = async ctx => {
 	}
 
 	const result = await db.updateScore(ctx.chat.id, name, amount)
-	if (result.user === null) {
+	if (!result.user) {
 		switch (result.err) {
 		case 'user unknown':
 			ctx.reply(`🤯 Entschuldige, ich kenne die Person ${name} nicht.`, noNotification)
@@ -83,7 +83,7 @@ const nextCommand = async ctx => {
 	}
 
 	const result = await db.updateScore(ctx.chat.id, null, amount)
-	if (result.user === null) {
+	if (!result.user) {
 		switch (result.err) {
 		case 'zero users':
 			ctx.reply('🤖 Es sind keine User angemeldet! Füge welche mit /add Name hinzu.')
