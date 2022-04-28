@@ -153,13 +153,11 @@ const updateScore = async (chatID, userID, amount) => {
 			if (userID === null) {
 				if (users.length === 0) {
 					return {
-						user: null,
 						err: 'zero users',
 					}
 				}
 				if (notOnVacation.length === 0) {
 					return {
-						user: null,
 						err: 'zero users not on vacation',
 					}
 				}
@@ -171,7 +169,6 @@ const updateScore = async (chatID, userID, amount) => {
 				candidate = _.find(users, user => user.userID === userID)
 				if (candidate === undefined) {
 					return {
-						user: null,
 						err: 'user unknown',
 					}
 				}
@@ -215,7 +212,6 @@ const updateScore = async (chatID, userID, amount) => {
 				}
 			}
 			return {
-				err: '',
 				user: candidate,
 				users: users,
 			}
