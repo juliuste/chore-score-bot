@@ -3,7 +3,9 @@ import { markdownv2 as format } from 'telegram-format'
 import _ from 'lodash'
 import { table, getBorderCharacters } from 'table'
 
-import * as db from './database.js'
+import Database from './database.js'
+
+const db = new Database()
 
 const toIntStrict = string => /^[-+]?\d+$/.test(string) ? Number(string) : undefined
 
@@ -119,7 +121,7 @@ const addCommand = async ctx => {
 	const user = await db.addUser(ctx.chat.id, name, 'average')
 
 	if (user === null) {
-		ctx.reply('Den gibt es schon, soweit ich weiß.', noNotification)
+		ctx.reply('🤯 Den gibt es schon, soweit ich weiß.', noNotification)
 	} else {
 		ctx.reply(`🤖 Habe ${user.userID} hinzugefügt mit einem Score von ${scoreToString(user.score)}.`, noNotification)
 	}
@@ -181,13 +183,17 @@ const scoresUsersCommand = async ctx => {
 	ctx.replyWithMarkdownV2(message + tableString, noNotification)
 }
 
-const bot = new Telegraf(process.env.TELEGRAM_TOKEN)
+(async () => {
+	await db.init()
 
-bot.command('give', giveCommand)
-bot.command('next', nextCommand)
-bot.command('add', addCommand)
-bot.command('remove', removeCommand)
-bot.command('vacation', vacationCommand)
-bot.command('scores', scoresUsersCommand)
+	const bot = new Telegraf(process.env.TELEGRAM_TOKEN)
 
-bot.launch()
+	bot.command('give', giveCommand)
+	bot.command('next', nextCommand)
+	bot.command('add', addCommand)
+	bot.command('remove', removeCommand)
+	bot.command('vacation', vacationCommand)
+	bot.command('scores', scoresUsersCommand)
+
+	bot.launch()
+})()
