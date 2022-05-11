@@ -10,7 +10,8 @@ const CHAT1 = 100
 const CHAT2 = 200
 const NO_CHAT = 999
 const USER1_1 = "user 1"
-const USER2_1 = "user 2"
+const USER1_2 = "user 2"
+const USER2_1 = "user 1"
 const NO_USER = "user 99"
 
 test.before('start mongodb server', async t => {
@@ -31,8 +32,9 @@ test.beforeEach('populate with users', async t => {
 	await db.addUser(CHAT2, USER2_1)
 })
 
-test.afterEach('drop database', async t => {
-	await t.context.client.db(t.context.dbName).dropDatabase()
+test.afterEach('drop collection', async t => {
+	const db = t.context.db
+	await db.clear()
 })
 
 test.after.always('cleanup', async t => {
@@ -40,7 +42,7 @@ test.after.always('cleanup', async t => {
 	await t.context.mongoDB.stop()
 })
 
-test('assign average score on user creation', async t => {
+test.serial('assign average score on user creation', async t => {
 	const db = t.context.db
 
 	const result = await db.updateScore(CHAT1, USER1_1, 5)
@@ -63,7 +65,7 @@ test('assign average score on user creation', async t => {
 	})
 })
 
-test('do nothing when adding already existing user', async t => {
+test.serial('do nothing when adding already existing user', async t => {
 	const db = t.context.db
 
 	const result = await db.addUser(CHAT1, USER1_1)
@@ -73,19 +75,19 @@ test('do nothing when adding already existing user', async t => {
 	t.is(users.length, 2)
 })
 
-test('no users for nonexistent chatID', async t => {
+test.serial('no users for nonexistent chatID', async t => {
 	const db = t.context.db
 
 	const users = await db.getUsers(NO_CHAT)
 
-	t.is(users, [])
+	t.deepEqual(users, [])
 })
 
-test('remove existing user', async t => {
+test.serial('remove existing user', async t => {
 	const db = t.context.db
 
-	const result = db.removeUser(CHAT1, USER1_1)
-	const users = db.getUsers(CHAT1)
+	const result = await db.removeUser(CHAT1, USER1_1)
+	const users = await db.getUsers(CHAT1)
 
 	t.like(result, {
 		chatID: CHAT1,
@@ -93,10 +95,10 @@ test('remove existing user', async t => {
 		vacation: false,
 		score: 0,
 	})
-	t.is(user.length, 1)
+	t.is(users.length, 1)
 })
 
-test('remove nonexistent user', async t => {
+test.serial('remove nonexistent user', async t => {
 	const db = t.context.db
 
 	const result = await db.removeUser(CHAT1, NO_USER)
@@ -104,10 +106,4 @@ test('remove nonexistent user', async t => {
 
 	t.is(result, null)
 	t.is(users.length, 2)
-})
-
-test('', async t => {
-	const db = t.context.db
-
-	db.toggleVacation()
 })
