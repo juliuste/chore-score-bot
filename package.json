@@ -12,24 +12,26 @@
 		"fix": "eslint --fix app",
 		"lint": "eslint app",
 		"start": "node app/index",
-		"test": "npm run lint && npm run check-deps"
+		"test": "ava",
+		"test-all": "npm run lint && npm run check-deps && npm run test"
 	},
 	"dependencies": {
-		"load-json-file": "^7.0.0",
 		"lodash": "^4.17.21",
 		"mongodb": "^4.5.0",
 		"table": "^6.8.0",
 		"telegraf": "^4.4.1",
-		"telegram-format": "^2.1.0",
-		"write-json-file": "^5.0.0"
+		"telegram-format": "^2.1.0"
 	},
 	"devDependencies": {
+		"ava": "^4.2.0",
 		"depcheck": "^1.4.2",
 		"eslint": "^7.32.0",
 		"eslint-config-standard": "^16.0.3",
 		"eslint-plugin-import": "^2.24.2",
 		"eslint-plugin-node": "^11.1.0",
-		"eslint-plugin-promise": "^5.1.0"
+		"eslint-plugin-promise": "^5.1.0",
+		"mongodb-memory-server": "^8.5.1",
+		"mongomem": "^0.1.9"
 	},
 	"engines": {
 		"node": ">=14"
