@@ -13,6 +13,7 @@
 		"lint": "eslint app",
 		"start": "node app/index",
 		"test": "ava",
+		"test-c": "c8 ava",
 		"test-all": "npm run lint && npm run check-deps && npm run test"
 	},
 	"dependencies": {
@@ -24,6 +25,7 @@
 	},
 	"devDependencies": {
 		"ava": "^4.2.0",
+		"c8": "^7.11.2",
 		"depcheck": "^1.4.2",
 		"eslint": "^7.32.0",
 		"eslint-config-standard": "^16.0.3",
