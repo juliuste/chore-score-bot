@@ -5,15 +5,11 @@ import { table, getBorderCharacters } from 'table'
 
 import Database from './database.js'
 
-const db = new Database()
-
 const toIntStrict = string => /^[-+]?\d+$/.test(string) ? Number(string) : undefined
 
 const getArguments = message => message.text.trim().split(/\s+/)
 
 const validName = name => true // dummy implementation
-
-const defaultNameFn = name => amount => `${amount > 0 ? `+${amount}` : String(amount)} für ${name}.`
 
 const scoreToString = score => Math.floor(score).toString()
 
@@ -67,7 +63,7 @@ const giveCommand = async ctx => {
 			throw new Error(result.err)
 		}
 	} else {
-		const msg = defaultNameFn(result.user.userID)(amount)
+		const msg = `${amount > 0 ? `+${amount}` : String(amount)} für ${result.user.userID}.`
 		const vacationWarning = result.user.vacation ? ' (Ist aber noch im Urlaub.)' : ''
 		const difference = computeDifference(result.users)
 		const warning = differenceWarning(difference)
@@ -79,10 +75,20 @@ const nextCommand = async ctx => {
 	const args = getArguments(ctx.message)
 	console.info('/next called with arguments ' + args)
 
-	const amount = args[1] ? toIntStrict(args[1]) : 1
-	if (amount === undefined) {
-		ctx.reply(`🤯 Entschuldige, ich verstehe die Zahl ${args[1]} nicht.`, noNotification)
-		return
+	let amount
+	let task
+	if (args.length <= 1) {
+		amount = 1
+		task = 'irgendwas'
+	} else {
+		const firstArgumentAsNumber = toIntStrict(args[1])
+		if (firstArgumentAsNumber) {
+			amount = firstArgumentAsNumber
+			task = (args.length <= 2) ? 'irgendwas' : args.slice(2).join(' ')
+		} else {
+			amount = 1
+			task = args.slice(1).join(' ')
+		}
 	}
 
 	const result = await db.updateScore(ctx.chat.id, null, amount)
@@ -98,7 +104,7 @@ const nextCommand = async ctx => {
 			throw new Error(result.err)
 		}
 	} else {
-		const msg = defaultNameFn(result.user.userID)(amount)
+		const msg = `${result.user.userID} ist dran mit ${task} für ${amount} Punkt${amount > 1 ? 'e' : ''}.`
 		const difference = computeDifference(result.users)
 		const warning = differenceWarning(difference)
 		ctx.reply('🤖 ' + msg + warning, noNotification)
@@ -184,7 +190,9 @@ const scoresUsersCommand = async ctx => {
 	ctx.replyWithMarkdownV2(message + tableString, noNotification)
 }
 
-(async () => {
+const db = new Database()
+
+;(async () => {
 	await db.connect()
 
 	const bot = new Telegraf(process.env.TELEGRAM_TOKEN)
