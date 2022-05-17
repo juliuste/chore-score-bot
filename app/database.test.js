@@ -1,7 +1,7 @@
 import test from 'ava'
 import { MongoMemoryReplSet } from 'mongodb-memory-server';
 
-import Database from './app/database.js'
+import Database from './database.js'
 
 import _ from 'lodash'
 
