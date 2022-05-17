@@ -1,7 +1,6 @@
 import test from 'ava'
 import { MongoMemoryReplSet } from 'mongodb-memory-server';
 
-import { MongoClient, ServerApiVersion } from 'mongodb'
 import Database from './app/database.js'
 
 import _ from 'lodash'
@@ -17,13 +16,11 @@ const NEW_USER = "user 10"
 const NO_USER = "user 99"
 
 test.before('start mongodb server', async t => {
-	t.context.mongoDB = await MongoMemoryReplSet.create({ replSet: { count: 3 } })
-	t.context.client = new MongoClient(t.context.mongoDB.getUri(), {
-		serverApi: ServerApiVersion.v1,
-	})
+	t.context.mongoDB = await MongoMemoryReplSet.create()
 	t.context.dbName = 'widschi-bot'
-	t.context.db = new Database(t.context.client, t.context.dbName)
-	await t.context.db.init(t.context.client, t.context.dbName)
+	t.context.dbUri = t.context.mongoDB.getUri()
+	t.context.db = new Database(t.context.dbUri, t.context.dbName)
+	await t.context.db.connect()
 })
 
 test.beforeEach('populate with users', async t => {
@@ -41,7 +38,7 @@ test.afterEach.always('drop collection', async t => {
 })
 
 test.after.always('cleanup', async t => {
-	await t.context.client.close()
+	await t.context.db.disconnect()
 	await t.context.mongoDB.stop()
 })
 

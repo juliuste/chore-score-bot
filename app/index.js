@@ -14,14 +14,15 @@ const getArguments = message => message.text.trim().split(/\s+/)
 const validName = name => true // dummy implementation
 
 const defaultNameFn = name => amount => `${amount > 0 ? `+${amount}` : String(amount)} für ${name}.`
-// const defaultNextFn = name => amount => `${name} ist dran.`
 
 const scoreToString = score => Math.floor(score).toString()
 
 const computeDifference = users => {
-	const notOnVacation = _.find(users, user => !user.vacation)
-	return _.maxBy(notOnVacation, user => user.score) - _.minBy(notOnVacation, user => user.score)
+	const notOnVacation = _.filter(users, user => !user.vacation)
+	return _.maxBy(notOnVacation, user => user.score).score - _.minBy(notOnVacation, user => user.score).score
 }
+
+const differenceWarning = difference => (difference > 5) ? ` Vorsicht, vermehrt /next verwenden. (Differenz: ${scoreToString(difference)}).` : ''
 
 const tableConfig = {
 	border: getBorderCharacters('void'),
@@ -69,8 +70,8 @@ const giveCommand = async ctx => {
 		const msg = defaultNameFn(result.user.userID)(amount)
 		const vacationWarning = result.user.vacation ? ' (Ist aber noch im Urlaub.)' : ''
 		const difference = computeDifference(result.users)
-		const differenceWarning = (difference > 5) ? ` Vorsicht, vermehrt /next verwenden. (Differenz: ${difference}).` : ''
-		ctx.reply('🤖 ' + msg + vacationWarning + differenceWarning, noNotification)
+		const warning = differenceWarning(difference)
+		ctx.reply('🤖 ' + msg + vacationWarning + warning, noNotification)
 	}
 }
 
@@ -80,7 +81,7 @@ const nextCommand = async ctx => {
 
 	const amount = args[1] ? toIntStrict(args[1]) : 1
 	if (amount === undefined) {
-		ctx.reply(`🤯 Entschuldige, ich kenne die Zahl ${args[1]} nicht.`, noNotification)
+		ctx.reply(`🤯 Entschuldige, ich verstehe die Zahl ${args[1]} nicht.`, noNotification)
 		return
 	}
 
@@ -99,8 +100,8 @@ const nextCommand = async ctx => {
 	} else {
 		const msg = defaultNameFn(result.user.userID)(amount)
 		const difference = computeDifference(result.users)
-		const differenceWarning = (difference > 5) ? ` Vorsicht, vermehrt /next verwenden. (Differenz: ${difference}).` : ''
-		ctx.reply('🤖 ' + msg + differenceWarning, noNotification)
+		const warning = differenceWarning(difference)
+		ctx.reply('🤖 ' + msg + warning, noNotification)
 	}
 }
 
@@ -152,7 +153,7 @@ const vacationCommand = async ctx => {
 
 	const name = args[1]
 	if (!name || name === '') {
-		ctx.reply('🤯 Du musst einen Namen angeben, den ich entfernen soll.', noNotification)
+		ctx.reply('🤯 Du musst noch sagen, wen ich in den Urlaub schicken soll.', noNotification)
 		return
 	}
 
@@ -184,7 +185,7 @@ const scoresUsersCommand = async ctx => {
 }
 
 (async () => {
-	await db.init()
+	await db.connect()
 
 	const bot = new Telegraf(process.env.TELEGRAM_TOKEN)
 

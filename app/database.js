@@ -1,5 +1,4 @@
 import { MongoClient, ServerApiVersion } from 'mongodb'
-import { fileURLToPath } from 'url'
 import _ from 'lodash'
 
 class Database {
@@ -7,26 +6,36 @@ class Database {
 		return name.toLowerCase()
 	}
 
-	constructor (client, dbName = 'widschi-bot') {
-		this.dbName = dbName
-		this.collectionName = 'users'
-
-		if (client) {
-			this.client = client
-		} else {
-			const credentials = fileURLToPath(new URL('X509-cert-5689221583293842508.pem', import.meta.url))
-			this.client = new MongoClient('mongodb+srv://widschi-bot.tafbz.mongodb.net/myFirstDatabase?authSource=%24external&authMechanism=MONGODB-X509&retryWrites=true&w=majority', {
-				sslKey: credentials,
-				sslCert: credentials,
-				serverApi: ServerApiVersion.v1,
-			})
+	constructor ({
+		connectionURI = process.env.WIDSCHIBOT_DB_URI,
+		dbName = process.env.WIDSCHIBOT_DB_NAME,
+		dbOptions,
+	} = {}) {
+		if (!connectionURI) {
+			throw new Error('Connecting to MongoDB: No connection URI specified as argument or WIDSCHIBOT_DB_URI environment variable.')
 		}
+		if (!dbName) {
+			throw new Error('Connecting to MongoDB: No connection URI specified as argument or WIDSCHIBOT_DB_NAME environment variable.')
+		}
+		dbOptions = {
+			serverApi: ServerApiVersion.v1,
+			...dbOptions,
+		}
+
+		this.dbName = dbName
+		this.connectionURI = connectionURI
+		this.collectionName = 'users'
+		this.client = new MongoClient(connectionURI, dbOptions)
 	}
 
-	async init () {
+	async connect () {
 		await this.client.connect()
 		this.db = this.client.db(this.dbName)
 		this.collection = this.db.collection(this.collectionName)
+	}
+
+	async disconnect () {
+		await this.client.close()
 	}
 
 	async clear () {
@@ -50,6 +59,8 @@ class Database {
 			average = first.average || 0
 			break
 		}
+		await cursor.close() // We should close the cursor manually since we might not have exhausted it.
+
 		userID = Database.normalizeName(userID)
 		const newUser = {
 			chatID: chatID,

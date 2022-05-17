@@ -13,8 +13,8 @@
 		"lint": "eslint app",
 		"start": "node app/index",
 		"test": "ava",
-		"test-c": "c8 ava",
-		"test-all": "npm run lint && npm run check-deps && npm run test"
+		"test-coverage": "c8 ava",
+		"test-all": "npm run lint && npm run check-deps && npm run test-coverage"
 	},
 	"dependencies": {
 		"lodash": "^4.17.21",
