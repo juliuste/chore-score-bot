@@ -53,13 +53,9 @@ class Database {
 				},
 			},
 		])
-		let average = 0
-		// eslint-disable-next-line no-unreachable-loop
-		for await (const first of cursor) {
-			average = first.average || 0
-			break
-		}
-		await cursor.close() // We should close the cursor manually since we might not have exhausted it.
+		let { done, value } = await cursor[Symbol.asyncIterator]().next()
+		await cursor.close() // Let's close the cursor manually even though we should have exhausted it.
+		const average = value?.average || 0
 
 		userID = Database.normalizeName(userID)
 		const newUser = {
