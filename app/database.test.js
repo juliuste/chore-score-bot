@@ -19,7 +19,10 @@ test.before('start mongodb server', async t => {
 	t.context.mongoDB = await MongoMemoryReplSet.create()
 	t.context.dbName = 'widschi-bot'
 	t.context.dbUri = t.context.mongoDB.getUri()
-	t.context.db = new Database(t.context.dbUri, t.context.dbName)
+	t.context.db = new Database({
+		connectionURI: t.context.dbUri,
+		dbName: t.context.dbName,
+	})
 	await t.context.db.connect()
 })
 
