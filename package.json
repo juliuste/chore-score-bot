@@ -1,17 +1,19 @@
 {
 	"name": "chore-score-bot",
 	"version": "0.0.0",
+	"description": "Telegram bot for randomly assigning chores to your flatmates.",
 	"private": true,
 	"homepage": "https://github.com/juliuste/chore-score-bot",
 	"bugs": "https://github.com/juliuste/chore-score-bot/issues",
 	"repository": "juliuste/chore-score-bot",
 	"license": "ISC",
 	"author": "Julius Tens <mail@juliustens.eu>",
+	"type": "module",
 	"scripts": {
 		"check-deps": "depcheck",
-		"fix": "eslint --fix app",
+		"fix": "npm run lint -- --fix",
 		"lint": "eslint app",
-		"start": "node app/index",
+		"start": "node app/index.js",
 		"test": "ava",
 		"test-coverage": "c8 ava",
 		"test-all": "npm run lint && npm run check-deps && npm run test-coverage"
@@ -36,6 +38,5 @@
 	},
 	"engines": {
 		"node": ">=16"
-	},
-	"type": "module"
+	}
 }
