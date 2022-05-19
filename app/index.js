@@ -128,7 +128,7 @@ const addCommand = async ctx => {
 	const user = await db.addUser(ctx.chat.id, name, 'average')
 
 	if (user === null) {
-		ctx.reply('🤯 Den gibt es schon, soweit ich weiß.', noNotification)
+		ctx.reply('🤯 Den Namen gibt es schon, soweit ich weiß.', noNotification)
 	} else {
 		ctx.reply(`🤖 Habe ${user.userID} hinzugefügt mit einem Score von ${scoreToString(user.score)}.`, noNotification)
 	}
@@ -147,7 +147,7 @@ const removeCommand = async ctx => {
 	const user = await db.removeUser(ctx.chat.id, name)
 
 	if (user === null) {
-		ctx.reply('🤯 Den kannte ich gar nicht.')
+		ctx.reply('🤯 Den Namen kannte ich gar nicht.')
 	} else {
 		ctx.reply(`🤖 Ich tracke keinen Score mehr für ${user.userID}. ${user.userID} hatte ${scoreToString(user.score)} Punkte `)
 	}
@@ -166,7 +166,7 @@ const vacationCommand = async ctx => {
 	const user = await db.toggleVacation(ctx.chat.id, name)
 
 	if (user === null) {
-		ctx.reply('🤯 Den kenne ich gar nicht.')
+		ctx.reply('🤯 Den Namen kenne ich gar nicht.')
 	} else if (user.vacation) {
 		ctx.reply(`🤖 Ab in den Urlaub, ${user.userID}!`, noNotification)
 	} else {
