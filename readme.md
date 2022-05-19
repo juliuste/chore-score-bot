@@ -18,9 +18,9 @@ The `<amount>`s might be any sequence of digits, possibly preceded by a sign.
 
 The arguments to all commands must be separated by whitespace.
 
-To see a table of everybody's scores and who is on vacation right now, use the `/scores` command. (Being on vacation is indicated in the table by a fun little emoji at the end of the line.)
-
 When someone is on vacation or can otherwise not fairly be expected to do chores right now, type `/vacation <user>`. They will not be assigned chores for the time being and receive a fair share of all points other people receive, so that they will stay at the same amount of points relative to the group's average. When they return from vacation, simply type `/vacation <user>` again.
+
+To see a table of everybody's scores and who is on vacation right now, use the `/scores` command. (Being on vacation is indicated in the table by a fun little emoji at the end of the line.)
 
 | Command                        | Effect                                |
 | ------------------------------ | ------------------------------------- |

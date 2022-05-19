@@ -1,5 +1,5 @@
 import test from 'ava'
-import { MongoMemoryReplSet } from 'mongodb-memory-server';
+import { MongoMemoryReplSet } from 'mongodb-memory-server'
 
 import Database from './database.js'
 
@@ -8,12 +8,12 @@ import _ from 'lodash'
 const CHAT_A = 100
 const CHAT_B = 200
 const NO_CHAT = 999
-const USER_A1 = "user 1"
-const USER_A2 = "user 2"
-const USER_A3 = "user 3"
-const USER_B1 = "user 1"
-const NEW_USER = "user 10"
-const NO_USER = "user 99"
+const USER_A1 = 'user 1'
+const USER_A2 = 'user 2'
+const USER_A3 = 'user 3'
+const USER_B1 = 'user 1'
+const NEW_USER = 'user 10'
+const NO_USER = 'user 99'
 
 // use t.like once it supports arrays, see https://github.com/avajs/ava/pull/3023
 const arraysLike = (t, actual, selector) => {
@@ -79,8 +79,6 @@ test.serial('assign average score on user creation', async t => {
 		vacation: false,
 		score: 0,
 	}], user => user.userID)
-
-	console.log(users)
 
 	arraysLike(t, users, correctUsers)
 })
@@ -209,7 +207,7 @@ test.serial('update score of nonexistent user', async t => {
 
 	const result = await db.updateScore(CHAT_A, NO_USER, 1)
 	t.like(result, {
-		err: 'user unknown'
+		err: 'user unknown',
 	})
 })
 
@@ -218,6 +216,6 @@ test.serial('call next with zero users', async t => {
 
 	const result = await db.updateScore(NO_CHAT, null, 1)
 	t.like(result, {
-		err: 'zero users'
+		err: 'zero users',
 	})
 })
