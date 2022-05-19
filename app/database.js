@@ -53,7 +53,7 @@ class Database {
 				},
 			},
 		])
-		let { done, value } = await cursor[Symbol.asyncIterator]().next()
+		const { value } = await cursor[Symbol.asyncIterator]().next()
 		await cursor.close() // Let's close the cursor manually even though we should have exhausted it.
 		const average = value?.average || 0
 
@@ -73,11 +73,7 @@ class Database {
 		}, {
 			upsert: true,
 		})
-		if (result.value === null) {
-			return newUser
-		} else {
-			return null
-		}
+		return (!result.value) ? newUser : null
 	}
 
 	async removeUser (chatID, userID) {
@@ -117,36 +113,23 @@ class Database {
 		const cursor = await this.collection.find({
 			chatID: chatID,
 		})
-		const users = []
-		for await (const user of cursor) {
-			users.push(user)
-		}
+		const users = await cursor.toArray()
 		const notOnVacation = _.filter(users, user => !user.vacation)
 
+		if (!userID && users.length === 0) { return { err: 'zero users' } }
+		if (!userID && notOnVacation.length === 0) { return { err: 'zero users not on vacation' } }
+
+		// get the correct candidate
 		let candidate
-		if (userID === null) {
-			if (users.length === 0) {
-				return {
-					err: 'zero users',
-				}
-			}
-			if (notOnVacation.length === 0) {
-				return {
-					err: 'zero users not on vacation',
-				}
-			}
+		if (!userID) {
 			const minScore = (_.minBy(notOnVacation, user => user.score)).score
 			const candidates = _.filter(notOnVacation, user => user.score === minScore)
 			candidate = candidates[_.random(candidates.length - 1)]
 		} else {
 			userID = Database.normalizeName(userID)
 			candidate = _.find(users, user => user.userID === userID)
-			if (candidate === undefined) {
-				return {
-					err: 'user unknown',
-				}
-			}
 		}
+		if (!candidate) { return { err: 'user unknown' } }
 
 		// If the candidate is on vacation (and therefore not part of
 		// notOnVacation), they were probably not on vacation when they earned
