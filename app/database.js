@@ -152,7 +152,15 @@ class Database {
 			}
 		}
 
-		// If the candidate is on vacation (and therefore not part of notOnVacation), they were probably not on vacation when they earned their points, and it is therefore fairer to include them in the number of people "who this work was for" to calculate the vacation setoff. (It seems impossible to be completely fair in every situation without making users specify when exactly the points were earned, which is too complex, and this is an okay approximation.) This also prevents the dividend from being zero when everyone is on vacation, and therefore prevents division by zero.
+		// If the candidate is on vacation (and therefore not part of
+		// notOnVacation), they were probably not on vacation when they earned
+		// their points, and it is therefore fairer to include them in the
+		// number of people "who this work was for" to calculate the vacation
+		// setoff. (It seems impossible to be completely fair in every situation
+		// without making users specify when exactly the points were earned,
+		// which is too complex, and this is an okay approximation.) This also
+		// prevents the dividend from being zero when everyone is on vacation,
+		// and therefore prevents division by zero.
 		const spreadAmong = notOnVacation.length + (candidate.vacation ? 1 : 0)
 		const vacationSetoff = amount / spreadAmong
 
