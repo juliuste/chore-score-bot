@@ -8,6 +8,7 @@
 	"repository": "juliuste/chore-score-bot",
 	"license": "ISC",
 	"author": "Julius Tens <mail@juliustens.eu>",
+	"contributors": ["Leon Ochmann (https://leonochmann.de/)"],
 	"type": "module",
 	"scripts": {
 		"check-deps": "depcheck",
