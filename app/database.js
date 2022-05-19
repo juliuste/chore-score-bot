@@ -109,11 +109,7 @@ class Database {
 		const cursor = await this.collection.find({
 			chatID: chatID,
 		})
-		const users = []
-		for await (const user of cursor) {
-			users.push(user)
-		}
-		return users
+		return await cursor.sort({ userID: 1 }).toArray()
 	}
 
 	// Add amount to the score of a certain user. If userID === null, add amount to the score of the user with the least score.
