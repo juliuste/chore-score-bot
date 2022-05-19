@@ -7,16 +7,13 @@ class Database {
 	}
 
 	constructor ({
-		connectionURI = process.env.WIDSCHIBOT_DB_URI,
-		dbName = process.env.WIDSCHIBOT_DB_NAME,
+		connectionURI = process.env.MONGODB_URI,
+		dbName = process.env.MONGODB_DATABASE,
 		dbOptions,
 	} = {}) {
-		if (!connectionURI) {
-			throw new Error('Connecting to MongoDB: No connection URI specified as argument or WIDSCHIBOT_DB_URI environment variable.')
-		}
-		if (!dbName) {
-			throw new Error('Connecting to MongoDB: No connection URI specified as argument or WIDSCHIBOT_DB_NAME environment variable.')
-		}
+		if (!connectionURI) throw new Error('Connecting to MongoDB: No connection URI specified as argument or MONGODB_URI environment variable.')
+		if (!dbName) throw new Error('Connecting to MongoDB: No connection URI specified as argument or MONGODB_DATABASE environment variable.')
+
 		dbOptions = {
 			serverApi: ServerApiVersion.v1,
 			...dbOptions,

@@ -1,10 +1,10 @@
 {
-	"name": "widschi-bot",
+	"name": "chore-score-bot",
 	"version": "0.0.0",
 	"private": true,
-	"homepage": "https://github.com/juliuste/widschi-bot",
-	"bugs": "https://github.com/juliuste/widschi-bot/issues",
-	"repository": "juliuste/widschi-bot",
+	"homepage": "https://github.com/juliuste/chore-score-bot",
+	"bugs": "https://github.com/juliuste/chore-score-bot/issues",
+	"repository": "juliuste/chore-score-bot",
 	"license": "ISC",
 	"author": "Julius Tens <mail@juliustens.eu>",
 	"scripts": {

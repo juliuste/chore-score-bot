@@ -1,10 +1,10 @@
-# widschi-bot
+# chore-score-bot
 
-Has the dishwasher in your apartment been in dire need of unloading for days and none of your roommates (including you) feel like doing it? Does the garbage can attract more flies than the bowl of vinegar your parents advised you to put next to it? Do you feel like some people are doing more than others? There's a bot for that! Simply add the [widschi-bot](https://t.me/WidschiBot) to your apartment's telegram group, track when people do chores and use the `/next` command to let the bot randomly assign a chore to someone who has done the least chores! widschi-bot also sports a vacation mode so that people enjoying their well-earned holidays aren't randomly yelled at to empty the trash can.
+Has the dishwasher in your apartment been in dire need of unloading for days and none of your roommates (including you) feel like doing it? Does the garbage can attract more flies than the bowl of vinegar your parents advised you to put next to it? Do you feel like some people are doing more than others? There's a bot for that! Simply add the [chore-score-bot](https://t.me/ChoreScore_Bot) to your apartment's telegram group, track when people do chores and use the `/next` command to let the bot randomly assign a chore to someone who has done the least chores! [chore-score-bot](https://t.me/ChoreScore_Bot) also sports a vacation mode so that people enjoying their well-earned holidays aren't randomly yelled at to empty the trash can.
 
-This is the backend for the <https://t.me/WidschiBot>.
+This is the backend for the <https://t.me/ChoreScore_Bot>.
 
-[![License](https://img.shields.io/github/license/juliuste/widschi-bot.svg?style=flat)](license)
+[![License](https://img.shields.io/github/license/juliuste/chore-score-bot.svg?style=flat)](license)
 
 ## Usage of the Bot
 
@@ -37,17 +37,17 @@ To see a table of everybody's scores and who is on vacation right now, use the `
 
 1. Clone and install the repo:
 ```
-git clone https://github.com/juliuste/widschi-bot.git
-cd widschi-bot
+git clone https://github.com/juliuste/chore-score-bot.git
+cd chore-score-bot
 npm install --production
 ```
 2. Obtain a telegram token for your bot by contacting the `@BotFather` telegram account, and expose it as an environment variable named `TELEGRAM_TOKEN`.
-3. Set up a MongoDB instance, expose an appropriate [MongoDB connection URI](https://www.mongodb.com/docs/manual/reference/connection-string/) as an environment variable named `WIDSCHIBOT_DB_URI`.
-4. Store the name of the database the bot should use as the environment variable `WIDSCHIBOT_DB_NAME`. (Within that database, the bot will create a collection named `users` where it stores all its information.)
+3. Set up a MongoDB instance, expose an appropriate [MongoDB connection URI](https://www.mongodb.com/docs/manual/reference/connection-string/) as an environment variable named `MONGODB_URI`.
+4. Store the name of the database the bot should use as the environment variable `MONGODB_DATABASE`. (Within that database, the bot will create a collection named `users` where it stores all its information.)
 5. Run `npm start`.
 
 ## Contributing
 
 For development and testing, you should of course drop the `--production` flag during installation. See the `package.json` for relevant npm scripts.
 
-If you found a bug or want to propose a feature, feel free to visit [the issues page](https://github.com/juliuste/widschi-bot/issues).
+If you found a bug or want to propose a feature, feel free to visit [the issues page](https://github.com/juliuste/chore-score-bot/issues).

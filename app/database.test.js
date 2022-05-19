@@ -25,7 +25,7 @@ const arraysLike = (t, actual, selector) => {
 
 test.before('start mongodb server', async t => {
 	t.context.mongoDB = await MongoMemoryReplSet.create()
-	t.context.dbName = 'widschi-bot'
+	t.context.dbName = 'chore-score-bot'
 	t.context.dbUri = t.context.mongoDB.getUri()
 	t.context.db = new Database({
 		connectionURI: t.context.dbUri,
