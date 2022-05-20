@@ -193,8 +193,10 @@ const scoresUsersCommand = async ctx => {
 const db = new Database()
 
 ;(async () => {
+	console.info('connecting to database')
 	await db.connect()
 
+	console.info('setting up bot')
 	const bot = new Telegraf(process.env.TELEGRAM_TOKEN)
 
 	bot.command('give', giveCommand)
@@ -204,5 +206,6 @@ const db = new Database()
 	bot.command('vacation', vacationCommand)
 	bot.command('scores', scoresUsersCommand)
 
+	console.info('launching bot')
 	bot.launch()
 })()
