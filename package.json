@@ -8,7 +8,9 @@
 	"repository": "juliuste/chore-score-bot",
 	"license": "ISC",
 	"author": "Julius Tens <mail@juliustens.eu>",
-	"contributors": ["Leon Ochmann (https://leonochmann.de/)"],
+	"contributors": [
+		"Leon Ochmann (https://leonochmann.de/)"
+	],
 	"type": "module",
 	"scripts": {
 		"check-deps": "depcheck",
@@ -21,21 +23,21 @@
 	},
 	"dependencies": {
 		"lodash": "^4.17.21",
-		"mongodb": "^4.6.0",
-		"table": "^6.8.0",
-		"telegraf": "^4.8.2",
+		"mongodb": "^5.7.0",
+		"table": "^6.8.1",
+		"telegraf": "^4.12.2",
 		"telegram-format": "^2.1.0"
 	},
 	"devDependencies": {
-		"ava": "^4.2.0",
-		"c8": "^7.11.3",
+		"ava": "^5.3.1",
+		"c8": "^8.0.0",
 		"depcheck": "^1.4.3",
-		"eslint": "^8.15.0",
-		"eslint-config-standard": "^17.0.0",
-		"eslint-plugin-import": "^2.26.0",
-		"eslint-plugin-n": "^15.2.0",
-		"eslint-plugin-promise": "^6.0.0",
-		"mongodb-memory-server": "^8.5.2"
+		"eslint": "^8.45.0",
+		"eslint-config-standard": "^17.1.0",
+		"eslint-plugin-import": "^2.27.5",
+		"eslint-plugin-n": "^16.0.1",
+		"eslint-plugin-promise": "^6.1.1",
+		"mongodb-memory-server": "^8.13.0"
 	},
 	"engines": {
 		"node": ">=16"
