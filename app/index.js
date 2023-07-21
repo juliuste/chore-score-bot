@@ -3,7 +3,7 @@ import { markdownv2 as format } from 'telegram-format'
 import _ from 'lodash'
 import { table, getBorderCharacters } from 'table'
 
-import { computeDifference, differenceWarning, getArguments, scoreToString, toIntStrict, validName } from './util.js'
+import { computeDifference, differenceWarning, getArguments, parseNumber, scoreToString, validName } from './util.js'
 import Database from './database.js'
 
 const tableConfig = {
@@ -33,7 +33,7 @@ const giveCommand = async ctx => {
 		return
 	}
 
-	const amount = args[2] ? toIntStrict(args[2]) : 1
+	const amount = parseNumber(args[2], 1)
 	if (amount === undefined) {
 		ctx.reply(`🤯 Entschuldige, ich kenne die Zahl ${args[2]} nicht.`, noNotification)
 		return
@@ -67,7 +67,7 @@ const nextCommand = async ctx => {
 		amount = 1
 		task = 'irgendwas'
 	} else {
-		const firstArgumentAsNumber = toIntStrict(args[1])
+		const firstArgumentAsNumber = parseNumber(args[1])
 		if (firstArgumentAsNumber) {
 			amount = firstArgumentAsNumber
 			task = (args.length <= 2) ? 'irgendwas' : args.slice(2).join(' ')

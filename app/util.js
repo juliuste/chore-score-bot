@@ -1,6 +1,12 @@
 import _ from 'lodash'
 
-export const toIntStrict = string => /^[-+]?\d+$/.test(string) ? Number(string) : undefined
+// parse a given string as a number, use fallback if string only consists of
+// non-digits
+export const parseNumber = (string, fallback = undefined) => {
+	if (/^[-+]?\d+(\.\d+)?$/.test(string)) return Number(string)
+	if (/^[^\d]+$/.test(string)) return fallback
+	return undefined
+}
 
 export const getArguments = message => message.text.trim().split(/\s+/)
 

@@ -170,7 +170,7 @@ test.serial('call next with some users on vacation', async t => {
 	await db.updateScore(CHAT_A, USER_A1, 3)
 	await db.updateScore(CHAT_A, USER_A2, 2)
 	await db.toggleVacation(CHAT_A, USER_A1) // USER_A1 will get half of the points awarded by the following two commands
-	await db.updateScore(CHAT_A, null, 4) // USER_A3 gets 4 points
+	await db.updateScore(CHAT_A, null, 4.2) // USER_A3 gets 4.2 points
 	await db.updateScore(CHAT_A, null, 2) // USER_A2 gets +2 points, so 4
 	await db.toggleVacation(CHAT_A, USER_A2) // now USER_A1 and USER_A2 will get the same points as USER_A3 by the next command
 	await db.updateScore(CHAT_A, null, 3) // USER_A3 gets +3
@@ -179,13 +179,13 @@ test.serial('call next with some users on vacation', async t => {
 
 	arraysLike(t, users, [{
 		vacation: true,
-		score: 3 + (4 + 2) / 2 + 3 / 1,
+		score: 3 + (4.2 + 2) / 2 + 3 / 1,
 	}, {
 		vacation: true,
 		score: 2 + 2 + 3 / 1,
 	}, {
 		vacation: false,
-		score: 0 + 4 + 3,
+		score: 0 + 4.2 + 3,
 	}])
 })
 
