@@ -3,22 +3,8 @@ import { markdownv2 as format } from 'telegram-format'
 import _ from 'lodash'
 import { table, getBorderCharacters } from 'table'
 
+import { computeDifference, differenceWarning, getArguments, scoreToString, toIntStrict, validName } from './util.js'
 import Database from './database.js'
-
-const toIntStrict = string => /^[-+]?\d+$/.test(string) ? Number(string) : undefined
-
-const getArguments = message => message.text.trim().split(/\s+/)
-
-const validName = name => true // dummy implementation
-
-const scoreToString = score => Math.floor(score).toString()
-
-const computeDifference = users => {
-	const notOnVacation = _.filter(users, user => !user.vacation)
-	return _.maxBy(notOnVacation, user => user.score).score - _.minBy(notOnVacation, user => user.score).score
-}
-
-const differenceWarning = difference => (difference > 5) ? ` Vorsicht, vermehrt /next verwenden. (Differenz: ${scoreToString(difference)}).` : ''
 
 const tableConfig = {
 	border: getBorderCharacters('void'),
