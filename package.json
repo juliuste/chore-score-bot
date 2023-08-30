@@ -23,7 +23,7 @@
 	},
 	"dependencies": {
 		"lodash": "^4.17.21",
-		"mongodb": "^5.7.0",
+		"mongodb": "^5.8.0",
 		"table": "^6.8.1",
 		"telegraf": "^4.12.2",
 		"telegram-format": "^2.1.0"
